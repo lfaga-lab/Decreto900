@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#203149" />
+  <title>Mili · Carrito de cobros</title>
+  <style>
+    :root{
+      --bg:#f4f1e8;
+      --card:#fffdf7;
+      --ink:#243046;
+      --muted:#6f7783;
+      --line:#ded8ca;
+      --blue:#24496e;
+      --blue2:#315f8f;
+      --coral:#da6863;
+      --green:#4e8064;
+      --gold:#c89b45;
+      --shadow:0 14px 35px rgba(36,48,70,.10);
+      --r:24px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+    body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .app{width:min(760px,100%);margin:auto;min-height:100vh;padding:20px 16px 110px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}
+    .brand small{display:block;color:var(--coral);font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:.72rem;margin-bottom:4px}
+    .brand h1{margin:0;font-size:clamp(1.65rem,5vw,2.35rem);line-height:1.03;letter-spacing:-.04em}
+    .brand p{margin:7px 0 0;color:var(--muted);font-size:.93rem}
+    .pill{border:1px solid var(--line);background:rgba(255,255,255,.55);border-radius:999px;padding:9px 12px;font-weight:800;font-size:.85rem;white-space:nowrap}
+    .hero{background:linear-gradient(145deg,#21354e,#2e5275);color:white;border-radius:30px;padding:22px;box-shadow:var(--shadow);position:relative;overflow:hidden;margin-bottom:20px}
+    .hero:after{content:"900";position:absolute;right:-8px;bottom:-42px;font-weight:900;font-size:9rem;opacity:.055;letter-spacing:-.08em}
+    .hero h2{margin:0 0 8px;font-size:1.25rem}
+    .hero p{margin:0;color:rgba(255,255,255,.76);max-width:540px;line-height:1.45}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+    .stat{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:13px 14px}
+    .stat b{display:block;font-size:1.5rem;line-height:1}
+    .stat span{font-size:.78rem;color:rgba(255,255,255,.7)}
+    .section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:26px 2px 13px}
+    .section-title h3{margin:0;font-size:1.05rem}
+    .section-title span{color:var(--muted);font-size:.82rem}
+    .blocks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .block{min-height:112px;border:none;border-radius:24px;padding:16px;text-align:left;color:white;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:.18s transform,.18s filter}
+    .block:active{transform:scale(.98)}
+    .block b{font-size:1.55rem;letter-spacing:-.03em}
+    .block span{display:block;margin-top:6px;font-size:.78rem;opacity:.78}
+    .block:after{content:"+";position:absolute;right:14px;bottom:6px;font-size:3.2rem;font-weight:200;opacity:.18}
+    .blocks .block:nth-child(1){background:#24496e}
+    .blocks .block:nth-child(2){background:#42627f}
+    .blocks .block:nth-child(3){background:#b85f59}
+    .blocks .block:nth-child(4){background:#4e8064}
+    .blocks .block:nth-child(5){background:#8a6a3d;grid-column:1/-1;min-height:95px}
+    .empty{background:rgba(255,255,255,.5);border:1px dashed #cfc7b7;border-radius:22px;padding:24px;text-align:center;color:var(--muted)}
+    .list{display:grid;gap:11px}
+    .item{background:var(--card);border:1px solid rgba(36,48,70,.08);border-radius:22px;padding:15px;box-shadow:0 8px 20px rgba(36,48,70,.055);display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+    .code{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;background:#e8edf2;color:var(--blue);font-weight:900;font-size:.88rem}
+    .meta{min-width:0}
+    .meta strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meta span{display:block;color:var(--muted);font-size:.82rem;margin-top:3px}
+    .paid .meta strong,.paid .meta span{opacity:.58}
+    .paid .code{background:#e6efe8;color:var(--green)}
+    .paybtn{border:none;border-radius:14px;padding:11px 12px;background:var(--ink);color:white;font-weight:800;font-size:.78rem}
+    .paid .paybtn{background:#e6efe8;color:var(--green)}
+    .secondary-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:9px}
+    .ghost{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:12px;padding:7px 10px;font-size:.76rem;font-weight:700}
+    .tabs{position:fixed;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(470px,calc(100% - 28px));background:rgba(31,42,58,.94);backdrop-filter:blur(18px);padding:8px;border-radius:22px;display:grid;grid-template-columns:1fr 1fr;gap:7px;box-shadow:0 18px 38px rgba(0,0,0,.23);z-index:20}
+    .tab{border:none;background:transparent;color:#dbe0e7;border-radius:16px;padding:12px 8px;font-weight:800}
+    .tab.active{background:white;color:var(--ink)}
+    .badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:5px;border-radius:999px;background:var(--coral);color:white;font-size:.72rem}
+    .view{display:none}.view.active{display:block}
+    dialog{border:none;padding:0;border-radius:28px;width:min(520px,calc(100% - 24px));background:var(--card);color:var(--ink);box-shadow:0 30px 80px rgba(20,27,38,.35)}
+    dialog::backdrop{background:rgba(20,27,38,.46);backdrop-filter:blur(4px)}
+    .sheet{padding:20px}
+    .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+    .sheet-head h3{margin:0;font-size:1.25rem}
+    .close{border:none;width:38px;height:38px;border-radius:50%;background:#ece8de;color:var(--ink);font-size:1.15rem}
+    label{display:block;font-size:.82rem;font-weight:800;margin:14px 0 7px}
+    input{width:100%;border:1px solid var(--line);background:white;border-radius:16px;padding:14px 15px;color:var(--ink);outline:none}
+    input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(36,73,110,.09)}
+    .selected-code{display:inline-flex;align-items:center;gap:8px;background:#e8edf2;color:var(--blue);border-radius:999px;padding:8px 11px;font-weight:900;font-size:.83rem}
+    .primary{width:100%;border:none;border-radius:17px;padding:15px;background:var(--blue);color:white;font-weight:900;margin-top:18px}
+    .note{font-size:.75rem;color:var(--muted);line-height:1.4;margin-top:10px}
+    .filterbar{display:flex;gap:8px;margin-bottom:13px;overflow:auto;padding-bottom:2px}
+    .filter{border:1px solid var(--line);background:rgba(255,255,255,.55);border-radius:999px;padding:9px 12px;white-space:nowrap;font-weight:800;color:var(--muted)}
+    .filter.active{background:var(--ink);border-color:var(--ink);color:white}
+    .footer-note{text-align:center;color:var(--muted);font-size:.72rem;margin-top:22px}
+    .salary-only{display:none}
+    body.salary-mode .salary-only{display:block}
+    body.salary-mode .mode-chip{display:inline-flex}
+    .money{font-variant-numeric:tabular-nums}
+    .item-amount{display:block;margin-top:5px;font-size:.82rem;font-weight:900;color:var(--blue)}
+    .paid .item-amount{color:var(--green);opacity:.7}
+    .mode-chip{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.1);border-radius:999px;padding:7px 10px;font-size:.76rem;font-weight:800;margin-top:14px}
+    .mode-chip button{border:none;background:transparent;color:white;text-decoration:underline;padding:0;font-size:inherit;font-weight:800}
+
+    .launch{position:fixed;inset:0;z-index:100;background:linear-gradient(160deg,#1f334b 0%,#24496e 52%,#17283b 100%);color:white;display:grid;place-items:center;padding:24px;overflow:hidden;transition:opacity .55s ease,visibility .55s ease}
+    .launch.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    .launch:before,.launch:after{content:"";position:absolute;border-radius:50%;filter:blur(4px);opacity:.18;animation:floatOrb 3s ease-in-out infinite alternate}
+    .launch:before{width:330px;height:330px;background:#da6863;right:-130px;top:-80px}
+    .launch:after{width:280px;height:280px;background:#f3efdc;left:-120px;bottom:-100px;animation-delay:.35s}
+    @keyframes floatOrb{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(18px,-12px,0) scale(1.08)}}
+    .launch-inner{position:relative;z-index:2;width:min(440px,100%);text-align:center}
+    .launch-mark{width:94px;height:94px;margin:0 auto 20px;border-radius:30px;display:grid;place-items:center;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.18);box-shadow:0 18px 60px rgba(0,0,0,.2);font-size:2rem;font-weight:950;letter-spacing:-.05em;animation:markIn 1.15s cubic-bezier(.2,.9,.2,1) both}
+    @keyframes markIn{0%{opacity:0;transform:scale(.65) rotate(-7deg)}70%{opacity:1;transform:scale(1.06) rotate(1deg)}100%{transform:scale(1) rotate(0)}}
+    .launch-kicker{font-size:.74rem;text-transform:uppercase;letter-spacing:.18em;font-weight:900;color:#f0b2ae;margin-bottom:8px;animation:fadeUp .75s .35s both}
+    .launch h1{font-size:clamp(2.25rem,10vw,3.4rem);line-height:.95;margin:0;letter-spacing:-.06em;animation:fadeUp .75s .5s both}
+    .launch p{margin:14px auto 0;color:rgba(255,255,255,.72);line-height:1.5;max-width:320px;animation:fadeUp .75s .65s both}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
+    .launch-progress{width:150px;height:4px;margin:26px auto 0;border-radius:999px;background:rgba(255,255,255,.13);overflow:hidden}
+    .launch-progress span{display:block;height:100%;width:0;background:white;border-radius:inherit;animation:progress3s 3s linear forwards}
+    @keyframes progress3s{to{width:100%}}
+    .mode-choice{display:none;margin-top:26px;animation:fadeUp .5s both}
+    .launch.ready .launch-progress{display:none}
+    .launch.ready .mode-choice{display:grid;gap:11px}
+    .mode-title{font-size:.86rem;color:rgba(255,255,255,.72);margin-bottom:4px}
+    .mode-btn{border:none;border-radius:18px;padding:15px 16px;font-weight:900;font-size:.95rem}
+    .mode-btn.primary-mode{background:#fff;color:#243046}
+    .mode-btn.secondary-mode{background:rgba(255,255,255,.08);color:white;border:1px solid rgba(255,255,255,.18)}
+    .mode-help{font-size:.72rem;color:rgba(255,255,255,.55);line-height:1.4;margin-top:2px}
+    @media (min-width:640px){.blocks{grid-template-columns:repeat(5,1fr)}.blocks .block:nth-child(5){grid-column:auto}.block{min-height:126px}.stats{grid-template-columns:repeat(4,1fr)}}
+  </style>
+</head>
+<body>
+  <section id="launchScreen" class="launch" aria-label="Inicio de la aplicación">
+    <div class="launch-inner">
+      <div class="launch-mark">M</div>
+      <div class="launch-kicker">Hecho para Mili</div>
+      <h1>Carrito de cobros</h1>
+      <p>Tu registro personal para no perder de vista ninguna cobertura.</p>
+      <div class="launch-progress" aria-hidden="true"><span></span></div>
+      <div class="mode-choice">
+        <div class="mode-title">¿Cómo querés usar la app hoy?</div>
+        <button class="mode-btn primary-mode" type="button" data-mode="salary">Usar con info salarial</button>
+        <button class="mode-btn secondary-mode" type="button" data-mode="simple">Usar sin info salarial</button>
+        <div class="mode-help">La información salarial solo se muestra en este dispositivo y se calcula con los valores cargados en la app.</div>
+      </div>
+    </div>
+  </section>
+
+  <main class="app">
+    <div class="topbar">
+      <div class="brand">
+        <small>Solo para Mili</small>
+        <h1>Carrito de cobros</h1>
+        <p>Registro personal de coberturas docentes.</p>
+      </div>
+      <div class="pill">Decreto 900</div>
+    </div>
+
+    <section id="cargarView" class="view active">
+      <div class="hero">
+        <h2>Que ninguna cobertura se pierda.</h2>
+        <p>Tocá el código correspondiente, cargá la fecha y la escuela. Después queda guardado hasta que aparezca en tu cobro.</p>
+        <div class="stats">
+          <div class="stat"><b id="pendingStat">0</b><span>pendientes de cobro</span></div>
+          <div class="stat"><b id="paidStat">0</b><span>ya cobradas</span></div>
+          <div class="stat salary-only"><b id="pendingMoneyStat" class="money">$0</b><span>te falta cobrar</span></div>
+        </div>
+        <div class="mode-chip salary-only">Modo salarial · <button type="button" data-change-mode>Cambiar</button></div>
+      </div>
+
+      <div class="section-title">
+        <h3>Agregar cobertura</h3>
+        <span>Elegí un bloque</span>
+      </div>
+      <div class="blocks">
+        <button class="block" data-code="PR"><b>PR</b><span>Agregar al carrito</span></button>
+        <button class="block" data-code="BLG"><b>BLG</b><span>Agregar al carrito</span></button>
+        <button class="block" data-code="ADS"><b>ADS</b><span>Agregar al carrito</span></button>
+        <button class="block" data-code="SYA"><b>SYA</b><span>Agregar al carrito</span></button>
+        <button class="block" data-code="BGS"><b>BGS</b><span>Agregar al carrito</span></button>
+      </div>
+
+      <div class="section-title">
+        <h3>Últimos movimientos</h3>
+        <span id="recentCaption">Sin registros</span>
+      </div>
+      <div id="recentList" class="list"></div>
+    </section>
+
+    <section id="carritoView" class="view">
+      <div class="hero">
+        <h2>Carrito de cobros</h2>
+        <p>Acá quedan todas las coberturas que cargaste. Cuando cobrás una, marcala y pasa al historial de cobradas.</p>
+        <div class="stats">
+          <div class="stat"><b id="pendingStat2">0</b><span>pendientes</span></div>
+          <div class="stat"><b id="paidStat2">0</b><span>cobradas</span></div>
+          <div class="stat salary-only"><b id="pendingMoneyStat2" class="money">$0</b><span>te falta cobrar</span></div>
+        </div>
+        <div class="mode-chip salary-only">Modo salarial · <button type="button" data-change-mode>Cambiar</button></div>
+      </div>
+
+      <div class="section-title"><h3>Mis coberturas</h3><span>Guardadas en este dispositivo</span></div>
+      <div class="filterbar">
+        <button class="filter active" data-filter="pending">Pendientes</button>
+        <button class="filter" data-filter="paid">Cobradas</button>
+        <button class="filter" data-filter="all">Todas</button>
+      </div>
+      <div id="cartList" class="list"></div>
+      <div class="footer-note">Los datos quedan guardados localmente en este navegador.</div>
+    </section>
+  </main>
+
+  <nav class="tabs">
+    <button class="tab active" data-view="cargarView">＋ Cargar</button>
+    <button class="tab" data-view="carritoView">Carrito <span id="navBadge" class="badge">0</span></button>
+  </nav>
+
+  <dialog id="entryDialog">
+    <form id="entryForm" class="sheet" method="dialog">
+      <div class="sheet-head">
+        <div>
+          <div class="selected-code" id="selectedCode">PR</div>
+          <h3 style="margin-top:10px">Nueva cobertura</h3>
+        </div>
+        <button type="button" class="close" id="closeDialog" aria-label="Cerrar">×</button>
+      </div>
+      <input type="hidden" id="codeInput" />
+      <label for="dateInput">Fecha</label>
+      <input id="dateInput" type="date" required />
+      <label for="schoolInput">Escuela</label>
+      <input id="schoolInput" type="text" placeholder="Ej. ISFD 41 / EP 23 / Escuela 8" autocomplete="off" required />
+      <button class="primary" type="submit">Agregar al carrito</button>
+      <div class="note">Podés cargar tantas coberturas como necesites. Después cada una se marca individualmente cuando efectivamente la cobrás.</div>
+    </form>
+  </dialog>
+
+  <script>
+    const KEY = 'mili_coberturas_decreto900_v1';
+    const AMOUNTS = { PR:25321, BLG:28924, ADS:43386, SYA:28924, BGS:43386 };
+    let entries = loadEntries();
+    let currentFilter = 'pending';
+    let salaryMode = false;
+
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => [...document.querySelectorAll(s)];
+
+    function loadEntries(){
+      try { return JSON.parse(localStorage.getItem(KEY)) || []; }
+      catch { return []; }
+    }
+    function saveEntries(){ localStorage.setItem(KEY, JSON.stringify(entries)); render(); }
+    function todayISO(){ return new Date().toISOString().slice(0,10); }
+    function formatDate(iso){
+      if(!iso) return '';
+      const [y,m,d] = iso.split('-');
+      return `${d}/${m}/${y}`;
+    }
+    function formatMoney(value){
+      return new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(value || 0);
+    }
+    function amountFor(code){ return AMOUNTS[code] || 0; }
+    function setMode(mode){
+      salaryMode = mode === 'salary';
+      document.body.classList.toggle('salary-mode', salaryMode);
+      $('#launchScreen').classList.add('hidden');
+      render();
+    }
+    function showModeChoice(){
+      $('#launchScreen').classList.remove('hidden');
+      $('#launchScreen').classList.add('ready');
+    }
+    function escapeHTML(str=''){
+      return str.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    }
+
+    $$('.block').forEach(btn => btn.addEventListener('click', () => {
+      const code = btn.dataset.code;
+      $('#codeInput').value = code;
+      $('#selectedCode').textContent = code;
+      $('#dateInput').value = todayISO();
+      $('#schoolInput').value = '';
+      $('#entryDialog').showModal();
+      setTimeout(()=>$('#schoolInput').focus(), 120);
+    }));
+
+    $('#closeDialog').addEventListener('click', () => $('#entryDialog').close());
+
+    $('#entryForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const code = $('#codeInput').value;
+      const date = $('#dateInput').value;
+      const school = $('#schoolInput').value.trim();
+      if(!code || !date || !school) return;
+      entries.unshift({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+        code, date, school, paid:false, createdAt: Date.now(), paidAt:null
+      });
+      saveEntries();
+      $('#entryDialog').close();
+      pulseBadge();
+    });
+
+    $$('.tab').forEach(tab => tab.addEventListener('click', () => {
+      $$('.tab').forEach(t=>t.classList.toggle('active', t===tab));
+      $$('.view').forEach(v=>v.classList.toggle('active', v.id===tab.dataset.view));
+      window.scrollTo({top:0,behavior:'smooth'});
+    }));
+
+    $$('.filter').forEach(btn=>btn.addEventListener('click',()=>{
+      currentFilter = btn.dataset.filter;
+      $$('.filter').forEach(b=>b.classList.toggle('active',b===btn));
+      renderCart();
+    }));
+
+    function togglePaid(id){
+      entries = entries.map(x => x.id===id ? {...x, paid:!x.paid, paidAt:!x.paid?Date.now():null} : x);
+      saveEntries();
+    }
+    function removeEntry(id){
+      const item = entries.find(x=>x.id===id);
+      if(!item) return;
+      if(confirm(`¿Eliminar ${item.code} · ${item.school}?`)){
+        entries = entries.filter(x=>x.id!==id);
+        saveEntries();
+      }
+    }
+
+    function itemHTML(item){
+      return `
+        <div class="item ${item.paid?'paid':''}">
+          <div class="code">${escapeHTML(item.code)}</div>
+          <div class="meta">
+            <strong>${escapeHTML(item.school)}</strong>
+            <span>${formatDate(item.date)} · ${item.paid?'Cobrado':'Pendiente de cobro'}</span>
+            ${salaryMode ? `<span class="item-amount money">${item.paid?'Cobrado: ':'A cobrar: '}${formatMoney(amountFor(item.code))}</span>` : ''}
+            <div class="secondary-actions">
+              <button class="ghost" data-delete="${item.id}">Eliminar</button>
+            </div>
+          </div>
+          <button class="paybtn" data-pay="${item.id}">${item.paid?'↩ Reabrir':'✓ Cobré'}</button>
+        </div>`;
+    }
+
+    function wireListActions(root){
+      root.querySelectorAll('[data-pay]').forEach(b=>b.addEventListener('click',()=>togglePaid(b.dataset.pay)));
+      root.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>removeEntry(b.dataset.delete)));
+    }
+
+    function renderRecent(){
+      const root = $('#recentList');
+      const recent = entries.slice(0,3);
+      $('#recentCaption').textContent = entries.length ? `${entries.length} registro${entries.length===1?'':'s'}` : 'Sin registros';
+      root.innerHTML = recent.length ? recent.map(itemHTML).join('') : '<div class="empty">Todavía no cargaste ninguna cobertura.<br>Elegí PR, BLG, ADS, SYA o BGS para empezar.</div>';
+      wireListActions(root);
+    }
+
+    function renderCart(){
+      const root = $('#cartList');
+      let visible = entries;
+      if(currentFilter==='pending') visible = entries.filter(x=>!x.paid);
+      if(currentFilter==='paid') visible = entries.filter(x=>x.paid);
+      root.innerHTML = visible.length ? visible.map(itemHTML).join('') : `<div class="empty">No hay coberturas ${currentFilter==='paid'?'cobradas':currentFilter==='pending'?'pendientes':'cargadas'}.</div>`;
+      wireListActions(root);
+    }
+
+    function pulseBadge(){
+      const badge = $('#navBadge');
+      badge.animate([{transform:'scale(1)'},{transform:'scale(1.35)'},{transform:'scale(1)'}],{duration:350});
+    }
+
+    function render(){
+      const pending = entries.filter(x=>!x.paid).length;
+      const paid = entries.filter(x=>x.paid).length;
+      ['#pendingStat','#pendingStat2'].forEach(s=>$(s).textContent=pending);
+      ['#paidStat','#paidStat2'].forEach(s=>$(s).textContent=paid);
+      const pendingMoney = entries.filter(x=>!x.paid).reduce((sum,x)=>sum+amountFor(x.code),0);
+      ['#pendingMoneyStat','#pendingMoneyStat2'].forEach(s=>$(s).textContent=formatMoney(pendingMoney));
+      $('#navBadge').textContent = pending;
+      renderRecent();
+      renderCart();
+    }
+
+    $$('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>setMode(btn.dataset.mode)));
+    $$('[data-change-mode]').forEach(btn=>btn.addEventListener('click',showModeChoice));
+
+    render();
+    setTimeout(()=>$('#launchScreen').classList.add('ready'),3000);
+  </script>
+</body>
+</html>
